@@ -1,0 +1,59 @@
+name: Swarm Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2️⃣ Setup Docker
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      # 3️⃣ Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: yashgupta567
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4️⃣ Build & Push image
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE=yashgupta567/img-classifier1:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
+
+      # 5️⃣ Deploy to VM using SSH
+      - name: Deploy to Swarm via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Clone repo if first time
+            if [ ! -d "app" ]; then
+              git clone https://github.com/yashgupta1126/ImageClassifierModel.git app
+            fi
+
+            cd app
+
+            # Pull latest code
+            git pull
+
+            # Login Docker on VM
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u yashgupta567 --password-stdin
+
+            # Create overlay network (important)
+            docker network create --driver overlay app-network || true
+
+            # Deploy stack
+            docker stack deploy -c docker-stack.yml my-ml-app --with-registry-auth
