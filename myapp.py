@@ -8,7 +8,6 @@ from PIL import Image
 import requests
 from io import BytesIO
 import urllib.parse
-
 # ─────────────────────────────────────────────
 # PAGE CONFIG
 # ─────────────────────────────────────────────
@@ -274,12 +273,12 @@ EMOJI_MAP = {
 }
 
 EXAMPLE_IMAGES = {
-    "🌲 Forest":   "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
-    "🌊 Sea":      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800",
+    "🌲 Forest":   "https://images.unsplash.com/photo-1596523444770-74d0b801ee46?w=600",
+    "🌊 Sea":      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
     "⛰️ Mountain": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
     "🏢 Building": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800",
-    "❄️ Glacier":  "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800",
-    "🛣️ Street":   "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800",
+    "❄️ Glacier":  "https://images.unsplash.com/photo-1623501942254-5b629c686045?w=600",
+    "🛣️ Street":   "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600",
 }
 
 # FIXED: Enforce 10 MB limit in code.
@@ -357,7 +356,7 @@ st.markdown("""
         <div class="hero-badge"><span>●</span> Introducing Classifier</div>
     </div>
     <h1 class="hero-title">Location Classifier Model</h1>
-    <p class="hero-subtitle">Upload an image or paste a URL to automatically classify the scene into distinct geographic categories.</p>
+    <p class="hero-subtitle">Upload an image or paste a URL to see if it’s a Forest, Sea, Mountain, Building, Glacier, or Street.</p>
 </div>
 """, unsafe_allow_html=True)
 
