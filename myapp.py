@@ -291,7 +291,7 @@ MAX_FILE_MB = 10
 
 
 # ─────────────────────────────────────────────
-# MODEL Loading
+# MODEL
 # ─────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
 def load_model():
