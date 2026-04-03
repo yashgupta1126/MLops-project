@@ -164,3 +164,4 @@ if st.button("🚀 Classify Image"):
 
     st.progress(confidence)
     st.write(f"Confidence: **{confidence*100:.2f}%**")
+    # trigger redeploy v2
