@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  imgclass:
+    # Replace with your Docker Hub or private registry image
+    image: <yashgupta567>/img-classifier:v1
+    ports:
+      - "8501:8501"
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+
+networks:
+  app-network:
+    driver: overlay
