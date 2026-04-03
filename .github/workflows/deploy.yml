@@ -27,7 +27,7 @@ jobs:
       # 4️⃣ Build & Push image
       - name: Build and Push Docker Image
         run: |
-          IMAGE=yashgupta567/img-classifier1:latest
+          IMAGE=yashgupta567/projectv2:latest
           docker build -t $IMAGE .
           docker push $IMAGE
 
@@ -41,7 +41,7 @@ jobs:
           script: |
             # Clone repo if first time
             if [ ! -d "app" ]; then
-              git clone https://github.com/yashgupta1126/ImageClassifierModel.git app
+              git clone https://github.com/yashgupta1126/MLops-project.git app
             fi
 
             cd app
