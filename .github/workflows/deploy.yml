@@ -8,10 +8,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
       # 1️⃣ Checkout code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2️⃣ Setup Docker
       - name: Set up Docker
@@ -24,10 +27,11 @@ jobs:
           username: yashgupta567
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4️⃣ Build & Push image
+      # 4️⃣ Build & Push image (COMMIT TAG)
       - name: Build and Push Docker Image
         run: |
-          IMAGE=yashgupta567/projectv2:latest
+          IMAGE=yashgupta567/projectv2:${{ github.sha }}
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
           docker build -t $IMAGE .
           docker push $IMAGE
 
@@ -52,7 +56,10 @@ jobs:
             # Login Docker on VM
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u yashgupta567 --password-stdin
 
-            # Create overlay network (important)
+            # Pull latest image (COMMIT TAG)
+            docker pull yashgupta567/projectv2:${{ github.sha }}
+
+            # Create overlay network
             docker network create --driver overlay app-network || true
 
             # Deploy stack
