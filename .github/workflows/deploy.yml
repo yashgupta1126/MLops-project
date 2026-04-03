@@ -69,3 +69,5 @@ jobs:
 
             # Force update (safety)
             docker service update --force my-ml-app_imgclass || true
+            # 🔥 AUTO CLEANUP
+            docker system prune -a -f || true

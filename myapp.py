@@ -13,47 +13,49 @@ import urllib.parse
 # PAGE CONFIG
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="GeoLens · Location Classifier",
+    page_title="Location Classifier Model",
     page_icon="🌍",
     layout="centered"
 )
 
 # ─────────────────────────────────────────────
-# GLOBAL STYLES
+# GLOBAL STYLES (MATCHING NEW TARGET DESIGN)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg-deep:     #050d0c;
-    --bg-card:     rgba(10, 28, 26, 0.72);
-    --border:      rgba(78, 195, 160, 0.18);
-    --accent:      #3de8b0;
-    --accent-dim:  #1db88a;
-    --accent-glow: rgba(61, 232, 176, 0.25);
-    --text-hi:     #e8f5f1;
-    --text-lo:     #7aada0;
-    --danger:      #ff6b6b;
-    --warn:        #ffd166;
+    --bg-deep:     #050505;
+    --bg-card:     #0d1110;
+    --border:      rgba(255, 255, 255, 0.08);
+    --accent-mint: #4df0b5;
+    --accent-lime: #b4f04d;
+    --text-hi:     #ffffff;
+    --text-lo:     #9ca3af;
 }
 
 /* ── Root Reset ── */
 html, body, [data-testid="stAppViewContainer"] {
-    background: var(--bg-deep) !important;
-    font-family: 'DM Sans', sans-serif;
+    background-color: var(--bg-deep) !important;
+    font-family: 'Inter', sans-serif;
     color: var(--text-hi);
 }
 
+/* Simulate the dark earth curve background */
 [data-testid="stAppViewContainer"]::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(61,232,176,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 40% at 90% 80%, rgba(29,184,138,0.07) 0%, transparent 60%);
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150vw;
+    height: 100vh;
+    background: radial-gradient(ellipse at bottom, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 60%);
+    border-radius: 100%;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.5;
 }
 
 /* ── Hide Streamlit chrome ── */
@@ -62,259 +64,179 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* ── Block container ── */
 .block-container {
-    max-width: 720px !important;
+    max-width: 800px !important;
     padding: 3rem 2rem 4rem !important;
     background: transparent !important;
+    z-index: 1;
+    position: relative;
 }
 
-/* ── Typography ── */
-h1, h2, h3 {
-    font-family: 'Syne', sans-serif;
-    letter-spacing: -0.02em;
-}
-
-/* ── Wordmark ── */
-.wordmark {
+/* ── Hero Section ── */
+.hero-wrapper {
     text-align: center;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4rem;
+    padding-top: 2rem;
 }
-.wordmark h1 {
-    font-size: 2.8rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #e8f5f1 30%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.badge-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.hero-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-hi);
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+}
+.hero-badge span {
+    color: var(--accent-lime);
+    font-size: 0.6rem;
+}
+.hero-title {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
     margin: 0;
-    line-height: 1;
+    color: var(--text-hi);
 }
-.wordmark p {
+.hero-subtitle {
     color: var(--text-lo);
-    font-size: 0.95rem;
-    font-weight: 300;
-    margin: 0.4rem 0 0;
-    letter-spacing: 0.04em;
+    font-size: 1.05rem;
+    margin-top: 1.5rem;
+    font-weight: 400;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
 }
 
 /* ── Cards — st.container blocks ── */
 [data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--bg-card) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 20px !important;
-    padding: 1.5rem !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    margin-bottom: 1.25rem !important;
-    transition: border-color 0.3s !important;
-}
-[data-testid="stVerticalBlockBorderWrapper"]:hover {
-    border-color: rgba(61,232,176,0.32) !important;
+    border-radius: 12px !important;
+    padding: 1.5rem 2rem !important;
+    margin-bottom: 1.5rem !important;
 }
 
+/* Mint Green Section Headers */
 .section-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    color: var(--accent-mint);
     text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.9rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* ── File uploader ── */
 [data-testid="stFileUploader"] {
-    border: 1.5px dashed var(--border) !important;
-    border-radius: 14px !important;
-    background: rgba(61,232,176,0.03) !important;
-    transition: border-color 0.3s, background 0.3s;
+    border: 1px dashed rgba(255,255,255,0.15) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.02) !important;
+    padding: 1rem !important;
 }
-[data-testid="stFileUploader"]:hover {
-    border-color: var(--accent-dim) !important;
-    background: rgba(61,232,176,0.06) !important;
+[data-testid="stFileUploader"] section {
+    color: var(--text-hi) !important;
 }
 
 /* ── Text input ── */
 [data-testid="stTextInput"] input {
-    background: rgba(5,13,12,0.7) !important;
+    background: rgba(0,0,0,0.3) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     color: var(--text-hi) !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.9rem !important;
-    transition: border-color 0.25s;
+    font-size: 0.95rem !important;
+    padding: 0.75rem 1rem !important;
 }
 [data-testid="stTextInput"] input:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+    border-color: var(--accent-mint) !important;
 }
 
-/* ── Buttons ── */
+/* ── Buttons (Examples & Actions) ── */
 .stButton > button {
-    font-family: 'Syne', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    letter-spacing: 0.04em !important;
-    border-radius: 12px !important;
-    height: 3rem !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    border-radius: 8px !important;
+    min-height: 3.5rem !important;
+    height: auto !important;
     width: 100% !important;
-    border: none !important;
-    transition: all 0.25s ease !important;
-    cursor: pointer !important;
+    border: 1px solid var(--border) !important;
+    background: rgba(255,255,255,0.03) !important;
+    color: var(--text-hi) !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important; /* Prevents text from breaking into multiple lines */
+}
+.stButton > button p {
+    white-space: nowrap !important;
+}
+.stButton > button:hover {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.2) !important;
 }
 
-/* Primary classify button */
-div[data-testid="column"]:nth-child(1) .stButton > button,
-.classify-btn .stButton > button {
-    background: linear-gradient(135deg, var(--accent-dim), var(--accent)) !important;
-    color: #040d0c !important;
-    box-shadow: 0 0 24px var(--accent-glow) !important;
+/* Primary classify button overrides */
+div[data-testid="column"]:nth-child(1) .stButton > button {
+    background: var(--accent-mint) !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 600 !important;
 }
 div[data-testid="column"]:nth-child(1) .stButton > button:hover {
-    transform: translateY(-1px) scale(1.01) !important;
-    box-shadow: 0 0 36px rgba(61,232,176,0.4) !important;
-}
-
-/* Secondary / reset button */
-div[data-testid="column"]:nth-child(2) .stButton > button {
-    background: rgba(255,255,255,0.04) !important;
-    color: var(--text-lo) !important;
-    border: 1px solid var(--border) !important;
-}
-div[data-testid="column"]:nth-child(2) .stButton > button:hover {
-    background: rgba(255,255,255,0.08) !important;
-    color: var(--text-hi) !important;
+    opacity: 0.9 !important;
 }
 
 /* ── Image ── */
 [data-testid="stImage"] img {
-    border-radius: 14px !important;
+    border-radius: 8px !important;
     border: 1px solid var(--border) !important;
 }
 
-/* ── Alerts ── */
-[data-testid="stAlert"] {
-    border-radius: 12px !important;
-    font-size: 0.9rem !important;
-}
-
-/* ── Progress bar ── */
-[data-testid="stProgress"] > div > div {
-    background: linear-gradient(90deg, var(--accent-dim), var(--accent)) !important;
-    border-radius: 99px !important;
-}
-[data-testid="stProgress"] > div {
-    background: rgba(255,255,255,0.07) !important;
-    border-radius: 99px !important;
-    height: 8px !important;
-}
-
-/* ── Result card ── */
+/* ── Result card (Single High-Prob) ── */
 .result-hero {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0;
+    text-align: center;
 }
 .result-emoji {
-    font-size: 3.2rem;
-    line-height: 1;
-    filter: drop-shadow(0 0 12px var(--accent-glow));
+    font-size: 4rem;
+    line-height: 1.2;
 }
 .result-label {
-    font-family: 'Syne', sans-serif;
     font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #e8f5f1, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+    color: var(--text-hi);
     line-height: 1;
 }
 .result-conf {
-    font-size: 0.88rem;
-    color: var(--text-lo);
-    margin-top: 0.3rem;
-}
-
-/* ── Breakdown row ── */
-.bar-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.65rem;
-}
-.bar-emoji { font-size: 1.1rem; width: 1.5rem; text-align: center; }
-.bar-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-hi);
-    width: 5.5rem;
-    text-transform: capitalize;
-}
-.bar-track {
-    flex: 1;
-    height: 7px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 99px;
-    overflow: hidden;
-}
-.bar-fill {
-    height: 100%;
-    border-radius: 99px;
-    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
-    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
-}
-.bar-fill.dim { background: rgba(61,232,176,0.25); }
-.bar-pct {
-    font-size: 0.8rem;
-    color: var(--text-lo);
-    width: 3.2rem;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-/* ── Meta chips ── */
-.meta-row {
-    display: flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-}
-.chip {
-    background: rgba(61,232,176,0.08);
-    border: 1px solid var(--border);
-    border-radius: 99px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.78rem;
-    color: var(--text-lo);
-    letter-spacing: 0.02em;
-}
-.chip span { color: var(--accent); font-weight: 500; }
-
-/* ── Divider ── */
-.divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 1.2rem 0;
+    font-size: 1rem;
+    color: var(--accent-mint);
+    margin-top: 0.2rem;
+    font-weight: 500;
 }
 
 /* ── OR separator ── */
 .or-sep {
     text-align: center;
-    color: var(--text-lo);
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    margin: 0.6rem 0;
+    color: var(--accent-mint);
+    font-size: 0.85rem;
+    margin: 1.5rem 0;
+    font-weight: 500;
 }
-
-/* ── Footer ── */
-.footer {
-    text-align: center;
-    color: var(--text-lo);
-    font-size: 0.78rem;
-    margin-top: 3rem;
-    letter-spacing: 0.04em;
-}
-.footer a { color: var(--accent); text-decoration: none; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -324,19 +246,19 @@ div[data-testid="column"]:nth-child(2) .stButton > button:hover {
 CLASSES = ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street']
 
 EMOJI_MAP = {
-    "buildings": "🏢",
-    "forest":    "🌲",
-    "glacier":   "❄️",
-    "mountain":  "⛰️",
-    "sea":       "🌊",
-    "street":    "🛣️",
+    "buildings": "🏢 Building",
+    "forest":    "🌲 Forest",
+    "glacier":   "❄️ Glacier",
+    "mountain":  "⛰️ Mountain",
+    "sea":       "🌊 Sea",
+    "street":    "🛣️ Street",
 }
 
 EXAMPLE_IMAGES = {
     "🌲 Forest":   "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
     "🌊 Sea":      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800",
     "⛰️ Mountain": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
-    "🏢 Buildings":"https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800",
+    "🏢 Building": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800",
     "❄️ Glacier":  "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800",
     "🛣️ Street":   "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800",
 }
@@ -361,13 +283,11 @@ def preprocess(image_bytes: bytes) -> np.ndarray:
     img = tf.cast(img, tf.float32) / 255.0
     return np.expand_dims(img.numpy(), axis=0)
 
-
 def predict(model, image_bytes: bytes):
     tensor = preprocess(image_bytes)
     preds  = model.predict(tensor, verbose=0)[0]
     order  = np.argsort(preds)[::-1]
     return [(CLASSES[i], float(preds[i])) for i in order]
-
 
 def fetch_url(url: str) -> bytes:
     parsed = urllib.parse.urlparse(url)
@@ -396,7 +316,6 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-
 def reset():
     for k in ["image_bytes", "image_source", "image_size", "results",
               "do_classify", "_last_upload_name", "_last_url"]:
@@ -405,28 +324,29 @@ def reset():
 
 
 # ─────────────────────────────────────────────
-# WORDMARK
+# HERO SECTION
 # ─────────────────────────────────────────────
 st.markdown("""
-<div class="wordmark">
-    <h1>GeoLens</h1>
-    <p>AI-powered location scene classifier</p>
+<div class="hero-wrapper">
+    <div class="badge-container">
+        <div class="hero-badge"><span>●</span> Introducing Classifier</div>
+    </div>
+    <h1 class="hero-title">Location Classifier Model</h1>
+    <p class="hero-subtitle">Upload an image or paste a URL to automatically classify the scene into distinct geographic categories.</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-# Load model (cached - spinner avoided to prevent empty box artifact)
+# Load model
 model = load_model()
 
 # ─────────────────────────────────────────────
 # INPUT CARD
 # ─────────────────────────────────────────────
 with st.container(border=True):
-    st.markdown('<div class="section-label">📂 Image Input</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">📁 IMAGE INPUT</div>', unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader(
-        "Drop an image here or click to browse",
+        "Drag and drop file here",
         type=["jpg", "jpeg", "png"],
         label_visibility="collapsed"
     )
@@ -440,7 +360,7 @@ with st.container(border=True):
     )
 
     # Example picker
-    st.markdown('<div class="section-label" style="margin-top:1rem;">✨ Try an example</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-label" style="margin-top:2.5rem;">✨ TRY AN EXAMPLE</div>', unsafe_allow_html=True)
     ex_cols = st.columns(len(EXAMPLE_IMAGES))
     for col, (label, ex_url) in zip(ex_cols, EXAMPLE_IMAGES.items()):
         with col:
@@ -458,8 +378,6 @@ with st.container(border=True):
 
 # ─────────────────────────────────────────────
 # STAGED INPUT → session state
-# Only re-process when the source actually changes to avoid
-# wiping results on every Streamlit rerun.
 # ─────────────────────────────────────────────
 if uploaded_file is not None:
     if uploaded_file.name != st.session_state._last_upload_name:
@@ -494,104 +412,59 @@ elif url_input.strip():
                 st.session_state.image_source = "URL"
                 st.session_state.image_size   = img.size
                 st.session_state.results      = None
-        except requests.exceptions.Timeout:
-            st.error("❌ Request timed out — the server took too long to respond.")
-        except requests.exceptions.HTTPError as e:
-            st.error(f"❌ HTTP error: {e}")
-        except ValueError as e:
-            st.error(f"⚠️ {e}")
         except Exception:
             st.error("❌ Could not load image from URL — please verify it points directly to an image file.")
 
+
 # ─────────────────────────────────────────────
-# PREVIEW CARD
+# PREVIEW & RESULTS CARD
 # ─────────────────────────────────────────────
 if st.session_state.image_bytes:
+    
+    # 1. Show the Preview container first
     with st.container(border=True):
-        st.markdown('<div class="section-label">🖼 Preview</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-label">👁️ PREVIEW</div>', unsafe_allow_html=True)
 
         st.image(
             Image.open(BytesIO(st.session_state.image_bytes)),
             use_container_width=True
         )
 
-        w, h = st.session_state.image_size or (0, 0)
-        st.markdown(f"""
-        <div class="meta-row">
-            <div class="chip">Resolution <span>{w} × {h} px</span></div>
-            <div class="chip">Source <span>{st.session_state.image_source}</span></div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
+        btn_col1, btn_col2 = st.columns([3, 1])
+        with btn_col1:
+            if st.button("Classify Image", use_container_width=True):
+                st.session_state.do_classify = True
+        with btn_col2:
+            if st.button("Clear", use_container_width=True):
+                reset()
+                st.rerun()
 
-    # ── Action buttons ──
-    # Persist classify intent via session state so result survives the rerun
-    # that Streamlit triggers immediately after a button click.
-    btn_col1, btn_col2 = st.columns([3, 1])
-    with btn_col1:
-        if st.button("🔍 Classify Image", use_container_width=True):
-            st.session_state.do_classify = True
-    with btn_col2:
-        if st.button("↩ Reset", use_container_width=True):
-            reset()
-            st.rerun()
+        if st.session_state.do_classify:
+            st.session_state.do_classify = False
+            with st.spinner("Processing image..."):
+                try:
+                    st.session_state.results = predict(model, st.session_state.image_bytes)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Prediction failed: {e}")
 
-    if st.session_state.do_classify:
-        st.session_state.do_classify = False
-        with st.spinner("Analysing scene…"):
-            try:
-                st.session_state.results = predict(model, st.session_state.image_bytes)
-            except Exception as e:
-                st.error(f"❌ Prediction failed: {e}")
+    # 2. Show the Results container below the preview
+    if st.session_state.results:
+        results = st.session_state.results
+        top_cls, top_conf = results[0]  # Show only the top prediction
+        
+        # Extract emoji and formatted label from our map
+        formatted_label = EMOJI_MAP.get(top_cls, f"❓ {top_cls.title()}")
+        emoji_only = formatted_label.split(" ")[0]
+        text_only = formatted_label.split(" ")[1]
 
-# ─────────────────────────────────────────────
-# RESULTS CARD
-# ─────────────────────────────────────────────
-if st.session_state.results:
-    results = st.session_state.results
-    top_cls, top_conf = results[0]
-    top_emoji = EMOJI_MAP[top_cls]
-
-    with st.container(border=True):
-        st.markdown('<div class="section-label">🎯 Classification Result</div>', unsafe_allow_html=True)
-
-        # Hero
-        st.markdown(f"""
-        <div class="result-hero">
-            <div class="result-emoji">{top_emoji}</div>
-            <div>
-                <div class="result-label">{top_cls.title()}</div>
-                <div class="result-conf">Top prediction · {top_conf*100:.1f}% confidence</div>
-            </div>
-        </div>
-        <hr class="divider">
-        <div class="section-label">All Classes</div>
-        """, unsafe_allow_html=True)
-
-        # Per-class bars
-        for i, (cls, conf) in enumerate(results):
-            emoji = EMOJI_MAP[cls]
-            pct   = conf * 100
-            dim_class = "" if i == 0 else " dim"
+        with st.container(border=True):
             st.markdown(f"""
-            <div class="bar-row">
-                <div class="bar-emoji">{emoji}</div>
-                <div class="bar-name">{cls}</div>
-                <div class="bar-track">
-                    <div class="bar-fill{dim_class}" style="width:{pct:.1f}%"></div>
-                </div>
-                <div class="bar-pct">{pct:.1f}%</div>
+            <div class="result-hero">
+                <div class="result-emoji">{emoji_only}</div>
+                <div class="result-label">{text_only}</div>
+                <div class="result-conf">{top_conf*100:.1f}% Confidence</div>
             </div>
             """, unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
-# FOOTER
-# ─────────────────────────────────────────────
-st.markdown("""
-<div class="footer">
-    Built with <a href="https://www.tensorflow.org">TensorFlow</a> &
-    <a href="https://streamlit.io">Streamlit</a> &nbsp;·&nbsp;
-    Classifies scenes into 6 categories: Buildings, Forest, Glacier, Mountain, Sea, Street
-</div>
-""", unsafe_allow_html=True)
