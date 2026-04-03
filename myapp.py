@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# GLOBAL STYLES (MATCHING NEW TARGET DESIGN)
+# GLOBAL STYLES
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -42,10 +42,10 @@ html, body, [data-testid="stAppViewContainer"] {
     color: var(--text-hi);
 }
 
-/* Simulate the dark earth curve background */
+/* FIXED: overlay behind all content */
 [data-testid="stAppViewContainer"]::before {
     content: '';
-    position: absolute;
+    position: fixed;
     top: -20%;
     left: 50%;
     transform: translateX(-50%);
@@ -54,7 +54,7 @@ html, body, [data-testid="stAppViewContainer"] {
     background: radial-gradient(ellipse at bottom, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 60%);
     border-radius: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     opacity: 0.5;
 }
 
@@ -67,7 +67,6 @@ html, body, [data-testid="stAppViewContainer"] {
     max-width: 800px !important;
     padding: 3rem 2rem 4rem !important;
     background: transparent !important;
-    z-index: 1;
     position: relative;
 }
 
@@ -117,7 +116,7 @@ html, body, [data-testid="stAppViewContainer"] {
     line-height: 1.6;
 }
 
-/* ── Cards — st.container blocks ── */
+/* ── Cards ── */
 [data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--bg-card) !important;
     border: 1px solid var(--border) !important;
@@ -150,6 +149,12 @@ html, body, [data-testid="stAppViewContainer"] {
     color: var(--text-hi) !important;
 }
 
+/* FIXED: Hide Streamlit's default "Limit 200MB" text */
+[data-testid="stFileUploaderDropzoneInstructions"] small,
+[data-testid="stFileUploader"] small {
+    display: none !important;
+}
+
 /* ── Text input ── */
 [data-testid="stTextInput"] input {
     background: rgba(0,0,0,0.3) !important;
@@ -163,7 +168,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-color: var(--accent-mint) !important;
 }
 
-/* ── Buttons (Examples & Actions) ── */
+/* ── Buttons ── */
 .stButton > button {
     font-weight: 500 !important;
     font-size: 0.9rem !important;
@@ -175,7 +180,7 @@ html, body, [data-testid="stAppViewContainer"] {
     background: rgba(255,255,255,0.03) !important;
     color: var(--text-hi) !important;
     transition: all 0.2s ease !important;
-    white-space: nowrap !important; /* Prevents text from breaking into multiple lines */
+    white-space: nowrap !important;
 }
 .stButton > button p {
     white-space: nowrap !important;
@@ -185,7 +190,7 @@ html, body, [data-testid="stAppViewContainer"] {
     border-color: rgba(255,255,255,0.2) !important;
 }
 
-/* Primary classify button overrides */
+/* Primary classify button */
 div[data-testid="column"]:nth-child(1) .stButton > button {
     background: var(--accent-mint) !important;
     color: #000 !important;
@@ -196,13 +201,19 @@ div[data-testid="column"]:nth-child(1) .stButton > button:hover {
     opacity: 0.9 !important;
 }
 
+/* FIXED: Equal-width example button columns */
+[data-testid="stHorizontalBlock"] > [data-testid="column"] {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
 /* ── Image ── */
 [data-testid="stImage"] img {
     border-radius: 8px !important;
     border: 1px solid var(--border) !important;
 }
 
-/* ── Result card (Single High-Prob) ── */
+/* ── Result card ── */
 .result-hero {
     display: flex;
     align-items: center;
@@ -237,6 +248,14 @@ div[data-testid="column"]:nth-child(1) .stButton > button:hover {
     margin: 1.5rem 0;
     font-weight: 500;
 }
+
+/* ── Upload limit hint ── */
+.upload-hint {
+    font-size: 0.78rem;
+    color: var(--text-lo);
+    margin-top: 0.5rem;
+    text-align: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -263,7 +282,13 @@ EXAMPLE_IMAGES = {
     "🛣️ Street":   "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800",
 }
 
-MAX_FILE_MB = 5
+# FIXED: Enforce 10 MB limit in code.
+# Streamlit's UI defaults to showing "200MB" — we hide that via CSS above
+# and show our own hint text below the uploader.
+# To also enforce it at the server level, create .streamlit/config.toml with:
+#   [server]
+#   maxUploadSize = 10
+MAX_FILE_MB = 10
 
 
 # ─────────────────────────────────────────────
@@ -350,6 +375,11 @@ with st.container(border=True):
         type=["jpg", "jpeg", "png"],
         label_visibility="collapsed"
     )
+    # FIXED: Custom hint replacing Streamlit's hidden "Limit 200MB" text
+    st.markdown(
+        f'<p class="upload-hint">Max file size: {MAX_FILE_MB} MB &nbsp;·&nbsp; JPG, JPEG, PNG</p>',
+        unsafe_allow_html=True
+    )
 
     st.markdown('<div class="or-sep">── or ──</div>', unsafe_allow_html=True)
 
@@ -361,10 +391,11 @@ with st.container(border=True):
 
     # Example picker
     st.markdown('<div class="section-label" style="margin-top:2.5rem;">✨ TRY AN EXAMPLE</div>', unsafe_allow_html=True)
-    ex_cols = st.columns(len(EXAMPLE_IMAGES))
+    # FIXED: gap="small" + use_container_width=True for equal spacing across all buttons
+    ex_cols = st.columns(len(EXAMPLE_IMAGES), gap="small")
     for col, (label, ex_url) in zip(ex_cols, EXAMPLE_IMAGES.items()):
         with col:
-            if st.button(label, key=f"ex_{label}"):
+            if st.button(label, key=f"ex_{label}", use_container_width=True):
                 try:
                     data = fetch_url(ex_url)
                     img  = Image.open(BytesIO(data))
@@ -382,6 +413,7 @@ with st.container(border=True):
 if uploaded_file is not None:
     if uploaded_file.name != st.session_state._last_upload_name:
         raw = uploaded_file.read()
+        # FIXED: enforce 10 MB limit
         if len(raw) > MAX_FILE_MB * 1024 * 1024:
             st.error(f"⚠️ File too large — please upload an image under {MAX_FILE_MB} MB.")
         else:
@@ -420,8 +452,7 @@ elif url_input.strip():
 # PREVIEW & RESULTS CARD
 # ─────────────────────────────────────────────
 if st.session_state.image_bytes:
-    
-    # 1. Show the Preview container first
+
     with st.container(border=True):
         st.markdown('<div class="section-label">👁️ PREVIEW</div>', unsafe_allow_html=True)
 
@@ -450,15 +481,13 @@ if st.session_state.image_bytes:
                 except Exception as e:
                     st.error(f"❌ Prediction failed: {e}")
 
-    # 2. Show the Results container below the preview
     if st.session_state.results:
         results = st.session_state.results
-        top_cls, top_conf = results[0]  # Show only the top prediction
-        
-        # Extract emoji and formatted label from our map
+        top_cls, top_conf = results[0]
+
         formatted_label = EMOJI_MAP.get(top_cls, f"❓ {top_cls.title()}")
         emoji_only = formatted_label.split(" ")[0]
-        text_only = formatted_label.split(" ")[1]
+        text_only  = formatted_label.split(" ")[1]
 
         with st.container(border=True):
             st.markdown(f"""
