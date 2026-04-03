@@ -10,6 +10,7 @@ jobs:
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       # 1️⃣ Checkout code
@@ -27,11 +28,10 @@ jobs:
           username: yashgupta567
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4️⃣ Build & Push image (COMMIT TAG)
+      # 4️⃣ Build & Push image
       - name: Build and Push Docker Image
         run: |
-          IMAGE=yashgupta567/projectv2:${{ github.sha }}
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          IMAGE=yashgupta567/projectv2:$IMAGE_TAG
           docker build -t $IMAGE .
           docker push $IMAGE
 
@@ -43,6 +43,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            IMAGE_TAG=${{ env.IMAGE_TAG }}
+
             # Clone repo if first time
             if [ ! -d "app" ]; then
               git clone https://github.com/yashgupta1126/MLops-project.git app
@@ -56,11 +58,14 @@ jobs:
             # Login Docker on VM
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u yashgupta567 --password-stdin
 
-            # Pull latest image (COMMIT TAG)
-            docker pull yashgupta567/projectv2:${{ github.sha }}
+            # Pull latest image
+            docker pull yashgupta567/projectv2:$IMAGE_TAG
 
             # Create overlay network
             docker network create --driver overlay app-network || true
 
-            # Deploy stack
-            docker stack deploy -c docker-stack.yml my-ml-app --with-registry-auth
+            # Deploy stack with IMAGE TAG
+            IMAGE_TAG=$IMAGE_TAG docker stack deploy -c docker-stack.yml my-ml-app --with-registry-auth
+
+            # Force update (safety)
+            docker service update --force my-ml-app_imgclass || true
