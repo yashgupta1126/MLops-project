@@ -282,7 +282,7 @@ EXAMPLE_IMAGES = {
 }
 
 # FIXED: Enforce 10 MB limit in code.
-# Streamlit's UI defaults to showing "200MB" — we hide that via CSS above
+# Streamlit's UI defaults to showing "200MB" — we hide that via CSS above.
 # and show our own hint text below the uploader.
 # To also enforce it at the server level, create .streamlit/config.toml with:
 #   [server]
