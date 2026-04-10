@@ -9,11 +9,11 @@ import requests
 from io import BytesIO
 import urllib.parse
 # ─────────────────────────────────────────────
-# PAGE CONFIG
+# PAGE CONFIG#
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title=" Image Classifier ML model ",
-    page_icon="📍",
+    page_icon="🌍",
     layout="centered"
 )
 
