@@ -1,5 +1,0 @@
-*.key
-*.pem
-__pycache__/
-.env
-*.key.pub
