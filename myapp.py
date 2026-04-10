@@ -13,7 +13,7 @@ import urllib.parse
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title=" Image Classifier ML model ",
-    page_icon="🌍",
+    page_icon="📍",
     layout="centered"
 )
 
