@@ -1,4 +1,4 @@
-# 🌍 MLOps End-To-End Location Image Classifier
+# 🌍 MLOps End-To-End Machine Learning Pipeline-CICD
 
 ![Made with Python](https://img.shields.io/badge/Made%20with-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Framework: TensorFlow](https://img.shields.io/badge/Framework-TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
@@ -7,6 +7,12 @@
 ![CI/CD: GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Deployment: Docker Swarm](https://img.shields.io/badge/Deployment-Docker%20Swarm-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+
+
+## 🌐 Live App
+The application is deployed using Docker Swarm with a fully automated GitHub Actions CI/CD pipeline.
+
+👉 **Live Application:** http://80.225.233.115:8501/
 
 An end-to-end **MLOps Image Classification Pipeline** that classifies natural scene images into six categories:
 
