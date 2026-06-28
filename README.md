@@ -129,25 +129,11 @@ Input Layer (150×150×3)
 | Input Size | 150 × 150 × 3 |
 | Classes | 6 |
 
----
-
-# 📈 Training Results
-
-The model was trained for **5 epochs**.
-
-| Epoch | Training Accuracy | Validation Accuracy |
-|---------|-------------------|----------------------|
-| 1 | 54.22% | 57.70% |
-| 2 | 65.77% | 67.93% |
-| 3 | 71.59% | 76.63% |
-| 4 | 73.82% | 77.47% |
-| 5 | 76.56% | 79.90% |
-
 ### Final Test Performance
 
 ```text
-Test Accuracy : 79.90%
-Test Loss     : 0.5515
+Test Accuracy : 85.93%
+Test Loss     : 0.4160
 ```
 
 ---
@@ -177,7 +163,7 @@ PROJECT
 ├── Dockerfile
 ├── docker-stack.yml
 ├── myapp.py
-├── newmodel.ipynb
+├── imgclfmodel.ipynb
 ├── requirements.txt
 ├── README.md
 └── LICENSE
